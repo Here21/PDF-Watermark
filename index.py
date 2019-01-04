@@ -49,10 +49,6 @@ class Application(Frame):
         self.startButton = Button(self, text='开始', command=self.addWatermark)
         # self.startButton.pack(side = BOTTOM)
 
-    def hello(self):
-        name = self.nameInput.get() or 'world'
-        messagebox.showinfo('Message', 'Hello, %s' % name)
-
     def list_all_files(self, rootdir):
         _files = []
         # 列出文件夹下所有的目录与文件
@@ -70,7 +66,7 @@ class Application(Frame):
         content = self.entry.get();
 
         # 默认大小为21cm*29.7cm
-        c = canvas.Canvas("mark.pdf", pagesize=(21 * cm, 29.7 * cm))
+        c = canvas.Canvas("./mark.pdf", pagesize=(21 * cm, 29.7 * cm))
         # 移动坐标原点(坐标系左下为(0,0))
         c.translate(1 * cm, 1 * cm)
 
