@@ -63,8 +63,8 @@ class Application(Frame):
         self.startButton.pack(side = BOTTOM)
 
         # button
-        self.testButton = Button(self, text='add', command=self.addListBox)
-        self.testButton.pack()
+        # self.testButton = Button(self, text='add', command=self.addListBox)
+        # self.testButton.pack()
 
     def list_all_files(self, rootdir):
         _files = []
