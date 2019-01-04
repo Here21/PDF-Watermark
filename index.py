@@ -4,7 +4,9 @@ import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from PyPDF2 import PdfFileReader, PdfFileWriter
+import time
 
+EXPIRATION = '2019-05-01'
 
 class Application(Frame):
     def __init__(self, master=None):
@@ -22,7 +24,15 @@ class Application(Frame):
         self.errorFiles = []
 
         self.pack()
-        self.createWidgets()
+        date = time.strftime("%Y-%m-%d", time.localtime())
+        if (date < EXPIRATION):
+            self.createWidgets()
+        else:
+            self.createExpiration()
+
+    def createExpiration(self):
+        self.lable = Label(self, text="超过使用期限，请联系 QQ:787876785")
+        self.lable.pack()
 
     def createWidgets(self):
         # 输入框
@@ -100,7 +110,6 @@ class Application(Frame):
         c.drawString(9 * cm, 6 * cm, content)
 
         # 关闭并保存pdf文件
-        print('maker 制作完成')
         c.save()
         messagebox.showinfo("提示", "生成水印成功，请继续执行")
         self.generButton.forget()
