@@ -11,12 +11,15 @@ class Application(Frame):
         Frame.__init__(self, master)
         ws = self.winfo_screenwidth()
         hs = self.winfo_screenheight()
-        w = 800;
-        h = 500;
+        w = 800
+        h = 500
         # 计算 x, y 位置
         x = (ws / 2) - (w / 2)
         y = (hs / 2) - (h / 2)
         self.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        # 错误信息
+        self.errorFilesCount = 0
+        self.errorFiles = []
 
         self.pack()
         self.createWidgets()
@@ -42,12 +45,16 @@ class Application(Frame):
 
         self.files = self.list_all_files('./')
         for item in self.files:  # 第一个小部件插入数据
-            self.listBox.insert(0, item)
+            self.listBox.insert(END, item)
 
         self.listBox.pack()
         # button
         self.startButton = Button(self, text='开始', command=self.addWatermark)
-        # self.startButton.pack(side = BOTTOM)
+        self.startButton.pack(side = BOTTOM)
+
+        # button
+        self.testButton = Button(self, text='add', command=self.addListBox)
+        self.testButton.pack()
 
     def list_all_files(self, rootdir):
         _files = []
@@ -102,35 +109,57 @@ class Application(Frame):
 
 
     def addWatermark(self):
-        self.startButton.Enable(False)
-        for file in self.files:
-            print("执行文件 ->", file)
-            # 获取一个 PdfFileReader 对象
-            pdfReader = PdfFileReader(open(file, 'rb'))
-            # 获取 PDF 的页数
-            pageCount = pdfReader.getNumPages()
+        for index, file in enumerate(self.files):
+            try:
+                print("执行文件 ->", index, file)
+                # 获取一个 PdfFileReader 对象
+                pdfReader = PdfFileReader(open(file, 'rb'), strict=True)
+                # 获取 PDF 的页数
+                pageCount = pdfReader.getNumPages()
+                # 获取一个 PdfFileWriter 对象
+                pdfWriter = PdfFileWriter()
 
-            # 获取一个 PdfFileWriter 对象
-            pdfWriter = PdfFileWriter()
+                pdf_watermark = PdfFileReader(open('./mark.pdf', 'rb'))
 
-            pdf_watermark = PdfFileReader(open('./mark.pdf', 'rb'))
+                # 标记进程
+                self.listBox.delete(index)
+                self.listBox.insert(index, file + ' ---  ing...')
 
-            # 给每一页打水印
-            for i in range(pageCount):
-                page = pdfReader.getPage(i)
-                page.mergePage(pdf_watermark.getPage(0))
-                page.compressContentStreams()  # 压缩内容
-                pdfWriter.addPage(page)
+                # 给每一页打水印
+                for i in range(pageCount):
+                    page = pdfReader.getPage(i)
+                    page.mergePage(pdf_watermark.getPage(0))
+                    page.compressContentStreams()  # 压缩内容
+                    pdfWriter.addPage(page)
 
-            # 将一个 PageObject 加入到 PdfFileWriter 中
-            # pdfWriter.addPage(page)
-            #
-            # # 输出到文件中
-            pdfWriter.write(open(file, 'wb'))
+                # 将一个 PageObject 加入到 PdfFileWriter 中
+                # pdfWriter.addPage(page)
+                #
+                # # 输出到文件中
+                pdfWriter.write(open(file, 'wb'))
 
-        self.startButton.Enable(True)
-        messagebox.showinfo('提示', "转化完成")
+                # 标记进程
+                self.listBox.delete(index)
+                self.listBox.insert(index, file + ' ---  done!')
 
+            except:
+                # 标记进程
+                self.listBox.delete(index)
+                self.listBox.insert(index, file + ' ---  failed!')
+
+                self.errorFilesCount = self.errorFilesCount + 1
+                self.errorFiles.append(file)
+                pass
+        if(self.errorFilesCount == 0):
+            messagebox.showinfo('提示', "转化完成")
+        else:
+            messagebox.showinfo('提示', "转化完成, 又未能执行的文件，请检查这些文件")
+        # print(self.errorFilesCount)
+        # print(self.errorFiles)
+
+    def addListBox(self):
+        self.listBox.delete(1)
+        self.listBox.insert(1, 'test ---->  failed')
 
 app = Application()
 # 设置窗口标题:
